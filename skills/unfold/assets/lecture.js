@@ -313,9 +313,10 @@ function lvRelayoutSoon() {
 function lvIntoView(e, top, smooth) {
   const rs = e.closest(".katex") ? lvLeaves(e) : [e.getBoundingClientRect()];
   if (!rs.length || !rs[0].height) return;
-  const r = rs[0], lo = 64, hi = window.innerHeight - 70;
+  const bar = document.querySelector(".foldbar").getBoundingClientRect().bottom;  // below the top buttons
+  const r = rs[0], lo = Math.max(64, bar + 14), hi = window.innerHeight - 70;
   let dy = 0;
-  if (top) dy = r.top - 26;
+  if (top) dy = r.top - Math.max(26, bar + 14);
   else if (r.top + r.height > hi) dy = Math.min(r.top + r.height - hi, r.top - lo);
   else if (r.top < lo) dy = r.top - lo;
   if (Math.abs(dy) > 2) window.scrollBy({top: dy, behavior: smooth && !lvCalm ? "smooth" : "auto"});

@@ -51,6 +51,7 @@ body.lv-folded section.lv-b.lv-open > h2::after { content: "fold"; }
 @media (max-width: 760px) {  /* narrow screens: the fold buttons take a second row under the top buttons */
   .foldbar { top: 44px; right: 14px; }
   .foldbar kbd { display: none; }
+  main.page { padding-top: 84px; }  /* room for the two rows of buttons */
 }
 
 /* narration block: the beat being played, when the fold level hides it in the note itself */
