@@ -97,6 +97,10 @@ docs/                    README images
 
 </details>
 
+## Acknowledgments
+
+The idea of reading a text at several levels of detail, from a skeleton down to the full paragraphs, comes from [TextFold](https://github.com/chenxiachan/textfold) by chenxiachan. unfold builds its fold levels from key sentences that the writer marks, and adds Lecture Mode, PDF citation crops and the teaching loop; it shares no code with TextFold.
+
 ## License
 
 Code and engine: **MIT** (`LICENSE`).
