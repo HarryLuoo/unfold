@@ -1,0 +1,116 @@
+/* ---- live lecture mode ----
+   A section is one board. Key sentences (<k>, p.key), statement blocks, display equations and figures are
+   written on the board, one per click. Everything else is narration (<say>): it shows one sentence at a
+   time directly under the board, with a pointer on the part of the board it is about. When the next
+   board starts, the finished one stays above as the note, with its narration folded. */
+:root { --lv-laser: #e0322d; --lv-hl: rgba(255, 205, 50, .42); }
+/* dark theme: a weaker highlighter keeps light text readable on it */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --lv-hl: rgba(255, 205, 50, .26); } }
+:root[data-theme="dark"] { --lv-hl: rgba(255, 205, 50, .26); }
+say { font: inherit; }
+.check { display: none; }
+main.page { position: relative; transition: opacity .35s; }
+body:not(.lv-ready) main.page:has([data-live]) { opacity: 0; }
+
+@media screen {  /* a printed page is the whole note at its fold level, also during a lecture */
+  body.lv-on .page { padding-bottom: 90vh; }
+  body.lv-on .lv-sec:not(.lv-started), body.lv-on section.sources, body.lv-on .build-stamp { display: none; }
+  body.lv-on .lv-el:not(.lv-shown) { display: none !important; }
+  body.lv-on .lv-cur .check.lv-shown { display: block; }
+}
+@keyframes lv-in {
+  from { opacity: 0; clip-path: inset(-12px 100% -12px -240px); }
+  to   { opacity: 1; clip-path: inset(-12px -70% -12px -240px); }
+}
+.lv-in { animation: lv-in .55s ease-out; }
+
+/* What is visible follows one rule, in and out of a lecture: an element shows when it has been played
+   (always true outside a lecture) and the fold level (keys 1-4) keeps it. Full and Read keep everything;
+   Points keeps key sentences, blocks, equations and figures; Statements keeps headings, definitions and
+   results. The beat being played is the one exception: when the level folds it away, it shows in the
+   narration block until the next click. A click on a line or a heading unfolds it in place. */
+body.lv-folded .lv-b:not(.lv-open) say { display: none; }
+body.lv-folded .lv-b:not(.lv-open) p.fopen > say { display: inline; }
+body.lv-folded .lv-b:not(.lv-open) p.lv-more { cursor: pointer; }
+body.lv-folded .lv-b:not(.lv-open) p.lv-more:not(.fopen)::after { content: " ⋯"; color: var(--muted); }
+body.lv-folded .lv-b:not(.lv-open) p.lv-narr:not(.fopen) { margin: -.45em 0 .3em; line-height: 1; }
+body.lv-folded .lv-b:not(.lv-open) details,
+body.lv-folded .lv-b:not(.lv-open) .sidenote, body.lv-folded .lv-b:not(.lv-open) .marginnote,
+body.lv-folded .lv-b:not(.lv-open) .sn-ref { display: none !important; }
+body.lv-st section.lv-b:not(.lv-open) > *:not(h2):not(h3):not(.env.def):not(.env.thm):not(.lv-say):not(.check),
+body.lv-st header.lv-b:not(.lv-open) .abstract,
+body.lv-st:not(.lv-on) section.sources { display: none !important; }
+body.lv-folded section.lv-b > h2 { cursor: pointer; }
+body.lv-folded section.lv-b > h2::after {
+  content: "unfold"; float: right; margin-top: 1.1em; font: normal 11px "Helvetica Neue", Arial, sans-serif; color: var(--muted);
+}
+body.lv-folded section.lv-b.lv-open > h2::after { content: "fold"; }
+.foldbar { position: fixed; top: 12px; right: 166px; z-index: 40; display: flex; gap: 4px; }
+.foldbar button.on { color: var(--ink); border-color: var(--link); }
+.foldbar kbd { font: inherit; opacity: .55; margin-right: 3px; }
+@media (max-width: 760px) {  /* narrow screens: the fold buttons take a second row under the top buttons */
+  .foldbar { top: 44px; right: 14px; }
+  .foldbar kbd { display: none; }
+}
+
+/* narration block: the beat being played, when the fold level hides it in the note itself */
+.lv-say {
+  margin: .5em 0 1em; padding: .35em 0 .35em .85em; border-left: 2px solid var(--lv-laser);
+  background: color-mix(in srgb, var(--lv-laser) 5%, transparent); font-size: .97em; line-height: 1.45; text-align: left;
+}
+.lv-say.lv-fade { animation: lv-fade .3s ease-out; }
+@keyframes lv-fade { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+.lv-ctl { position: fixed; right: 14px; bottom: 12px; z-index: 42; display: flex; gap: 5px; align-items: center;
+  font: 11.5px "Helvetica Neue", Arial, sans-serif; color: var(--muted); }
+.lv-ctl[hidden] { display: none; }
+.lv-ctl button, .lv-toggle, .foldbar button {
+  font: 12px "Helvetica Neue", Arial, sans-serif; background: var(--paper); color: var(--muted);
+  border: 1px solid var(--pop-border); border-radius: 4px; padding: 3px 8px; cursor: pointer;
+}
+.lv-toggle { position: fixed; top: 12px; right: 78px; z-index: 40; }
+.lv-guide { position: fixed; left: 14px; bottom: 12px; z-index: 46; max-width: 330px; padding: .7em .9em .6em;
+  font: 12.5px/1.45 "Helvetica Neue", Arial, sans-serif; color: var(--ink); background: var(--pop-bg);
+  border: 1px solid var(--pop-border); border-left: 3px solid var(--lv-laser); border-radius: 6px; box-shadow: var(--pop-shadow); }
+.lv-guide ul { margin: .45em 0 .55em; padding: 0; list-style: none; }
+.lv-guide li { margin: .2em 0; color: var(--muted); }
+.lv-guide kbd { font: inherit; font-weight: 600; color: var(--ink); }
+.lv-guide button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--pop-border); border-radius: 4px; padding: 3px 10px; cursor: pointer; }
+@media (max-width: 760px) { .lv-guide { left: 10px; right: 10px; bottom: 54px; max-width: none; } }
+
+/* pointer and ink: drawn in a layer over the page, in page coordinates, so marks scroll with the text */
+.lv-ink { position: absolute; inset: 0; pointer-events: none; z-index: 30; }
+.lv-dot {
+  position: absolute; left: 0; top: 0; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
+  background: var(--lv-laser); box-shadow: 0 0 7px 2px color-mix(in srgb, var(--lv-laser) 55%, transparent);
+  opacity: 0; transition: transform .42s cubic-bezier(.4, 0, .2, 1), opacity .3s;
+}
+.lv-mark { position: absolute; transition: opacity .3s; }
+.lv-mark.out { opacity: 0; }
+.lv-line { height: 2px; border-radius: 1px; background: var(--lv-laser); transform-origin: left center; }
+.lv-hl { border-radius: 2px; background: var(--lv-hl); transform-origin: left center; }
+.lv-spot { border-radius: 6px; background: color-mix(in srgb, var(--lv-laser) 15%, transparent); }
+svg.lv-box { overflow: visible; }
+svg.lv-box rect { fill: none; stroke: var(--lv-laser); stroke-width: 1.7; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.lv-line.kept { background: var(--maroon); }
+svg.lv-box.kept rect { stroke: var(--maroon); stroke-width: 1.3; }
+
+/* check questions on the board; they leave when the board is finished */
+.check { border: 1px dashed var(--muted); border-radius: 6px; padding: .55em .9em .35em; margin: 1em 0; }
+.check::before { content: "Your turn"; font: bold 10.5px "Helvetica Neue", Arial, sans-serif; text-transform: uppercase; letter-spacing: .07em; color: var(--maroon); }
+.check p { text-align: left; margin-bottom: .5em; }
+.check ul { list-style: none; padding: 0; margin: .2em 0 .6em; }
+.check li { padding: .3em .65em; margin: .3em 0; border: 1px solid var(--pop-border); border-radius: 5px; cursor: pointer; }
+.check li .r { display: none; margin-top: .25em; color: var(--muted); font-size: .93em; }
+.check li.chosen { border-color: var(--link); }
+.check li.chosen .r { display: block; }
+.check textarea {
+  width: 100%; box-sizing: border-box; min-height: 4.2em; font: inherit; font-size: .95em; color: inherit;
+  background: transparent; border: 1px solid var(--pop-border); border-radius: 5px; padding: .4em .55em;
+}
+.check .row { display: flex; gap: .7em; align-items: center; margin: .4em 0 .5em; font: 12px "Helvetica Neue", Arial, sans-serif; color: var(--muted); }
+.check .row input { width: 4em; font: inherit; color: inherit; background: transparent; border: 1px solid var(--pop-border); border-radius: 4px; padding: 2px 4px; }
+.check .row button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--pop-border); border-radius: 4px; padding: 3px 9px; cursor: pointer; }
+@media print {
+  .lv-ctl, .lv-toggle, .foldbar, .lv-ink, .lv-say, .lv-guide { display: none !important; }
+  section.lv-b > h2::after, p.lv-more::after { content: none !important; }  /* fold affordances */
+}

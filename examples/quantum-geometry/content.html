@@ -1,0 +1,301 @@
+<header class="titleblock" data-live>
+<h1>Quantum geometry and topology from the beginning</h1>
+<p class="subtitle">A first look, November 2026 · live-mode example</p>
+<div class="abstract">
+<p class="key">The quantum states that a system can occupy, as a parameter such as the crystal momentum \(\mathbf k\) varies, form a curved space. Nearby states lie a definite distance apart, which the quantum metric measures, and a closed loop of states carries a phase, which the Berry curvature measures.</p>
+<p class="key">When the parameter space is closed, as the Brillouin zone is, the total Berry curvature of a band equals \(2\pi\) times an integer, the Chern number \(C\). No smooth change of the crystal can alter \(C\), and in a two-dimensional insulator \(C\) fixes the Hall conductance at \(C\,e^2/h\).</p>
+<p><say>We start from what topology means in mathematics, build the metric and the curvature for a family of states, work the whole story out for a spin in a magnetic field, and then return to a crystal to see why the integer survives and what it controls.</say></p>
+</div>
+</header>
+
+<section>
+<h2 data-num="1">What topology means in mathematics</h2>
+
+<p><k>In topology, we ask which properties of a space survive every <span id="t-deform">continuous deformation</span>.</k> <say at="t-deform" ink="line">We may stretch and bend a rubber sheet, but we may not tear it or glue two points together.</say> <say>A sphere and the surface of a cube are the same space to a topologist, because we can deform one into the other; a sphere and a torus are different, because no continuous deformation removes the hole of the torus.</say> <say>Lengths, angles and curvature, which a deformation changes, belong to geometry, not to topology.</say></p>
+
+<p><k>A property that survives deformation is called a topological invariant.</k> <k at="t-int" ink="line" keep>The invariants that matter in physics are <span id="t-int">integers</span>, because a quantity that depends continuously on the space and can only take integer values cannot change at all: a continuous quantity cannot jump from \(1\) to \(2\) without passing through \(3/2\).</k> <k>So the question is always which integer a space or a map carries, and where it is allowed to change.</k></p>
+
+<div class="env def" data-label="Definition 1.1">
+<p><b>Winding number.</b> For a closed curve \(t\mapsto(x(t),y(t))\), \(0\le t\le 1\), in the plane that avoids the origin, with polar angle \(\theta=\arctan(y/x)\),</p>
+<p class="disp">\[ w=\htmlId{w-norm}{\frac{1}{2\pi}}\oint \htmlId{w-dth}{\mathrm{d}\theta}=\frac{1}{2\pi}\oint \frac{x\,\mathrm{d}y-y\,\mathrm{d}x}{\htmlId{w-den}{x^2+y^2}}. \tag{1.1} \]</p>
+</div>
+
+<p><say at="w-dth" ink="dot">Along a short piece of the curve, the polar angle changes by \(\mathrm{d}\theta\), and the integral adds these changes over one trip around the curve.</say> <say at="w-norm" ink="line">Dividing by \(2\pi\) turns the total angle into a number of turns.</say> <say at="w-den" ink="box" keep>The Cartesian form of the same integrand has \(x^2+y^2\) in the denominator, so it diverges at the origin and nowhere else.</say></p>
+
+<p class="key">The curve closes, so \(\theta(1)\) and \(\theta(0)\) describe the same point and differ by \(2\pi w\): \(w\) is an integer. The integrand is local, since it depends only on the curve near each point, and the result is global (Figure 1.1).</p>
+
+<figure class="plot"><img src="figures/winding.png" alt="Curves with winding numbers 0, 1 and 2"><figcaption><span class="sc">Figure 1.1.</span> Closed curves with winding numbers \(0\), \(1\) and \(2\) about the origin (dot). We can deform any of them without changing \(w\), as long as the curve never crosses the origin.</figcaption></figure>
+
+<p class="key" at="t-pattern" ink="hl" keep>If we deform the curve, \(w\) stays fixed, with one exception: the curve may pass through the origin, where \(\theta\) is undefined and the integrand diverges. The pattern <span id="t-pattern">“a local integrand, a global integer, and a change only where the integrand is undefined”</span> carries over unchanged to everything below.</p>
+
+<p class="key">At each point of a closed surface, the Gaussian curvature \(K\) is the product of the two principal curvatures.</p>
+
+<div class="env thm" data-label="Theorem 1.2">
+<p><b>Gauss–Bonnet.</b> For any closed surface \(S\) <a href="#ref4">[4]</a>,</p>
+<p class="disp" id="gb-eq">\[ \htmlId{gb-int}{\int_S K\,\mathrm{d}A}=\htmlId{gb-chi}{2\pi\chi},\qquad \chi=2-2\,(\text{number of holes}). \tag{1.2} \]</p>
+</div>
+
+<p><say at="gb-int" ink="line">A sphere of radius \(R\) has \(K=1/R^2\) everywhere, so \(\int K\,\mathrm{d}A=(1/R^2)(4\pi R^2)=4\pi=2\pi\cdot 2\), independent of \(R\).</say> <k>Dent a sphere and \(K\) changes from point to point, but \(\int K\,\mathrm{d}A\) stays \(4\pi\).</k> <say at="gb-chi" ink="dot">A torus has \(\chi=0\): its outer half has \(K\gt 0\), its inner half \(K\lt 0\), and the two cancel.</say></p>
+
+<p class="key" at="gb-eq" ink="box" keep>The Berry curvature of Section 3 plays the role of \(K\), and the Chern number that of \(\chi\).</p>
+</section>
+
+<section>
+<h2 data-num="2">Quantum states form a curved space</h2>
+
+<p><k>A family of states \(|u(\boldsymbol\lambda)\rangle\), labeled by real parameters \(\boldsymbol\lambda=(\lambda^1,\lambda^2,\dots)\), has a natural distance between neighbouring members.</k> <say>The parameters might be the direction of a magnetic field, or the crystal momentum, in which case \(|u(\mathbf k)\rangle\) is the periodic part of a Bloch state.</say></p>
+
+<div class="check predict">
+<p>The vectors \(|u\rangle\) and \(e^{i\beta}|u\rangle\) describe the same physical state. Which candidate for the distance between two normalized states \(|u\rangle\) and \(|v\rangle\) gives zero for this pair, whatever \(\beta\) is?</p>
+<ul>
+<li>\(\big\||u\rangle-|v\rangle\big\|^2\)<span class="r">For \(|v\rangle=e^{i\beta}|u\rangle\) this candidate equals \(|1-e^{i\beta}|^2=2-2\cos\beta\), which vanishes only at \(\beta=0\).</span></li>
+<li>\(1-|\langle u|v\rangle|^2\)<span class="r">Yes: \(|\langle u|e^{i\beta}u\rangle|^2=1\) for every \(\beta\). We build the metric from this quantity next.</span></li>
+<li>\(1-\mathrm{Re}\langle u|v\rangle\)<span class="r">For \(|v\rangle=e^{i\beta}|u\rangle\) this candidate equals \(1-\cos\beta\), which depends on the phase.</span></li>
+</ul>
+</div>
+
+<p class="key">Two vectors that differ by a phase, \(|u\rangle\) and \(e^{i\beta}|u\rangle\), describe the same physical state, so the distance must ignore such phases. The overlap probability ignores them: two normalized states are identical exactly when \(|\langle u|v\rangle|^2=1\).</p>
+
+<div class="env def" data-label="Definition 2.1">
+<p><b>Quantum metric.</b> With \(\partial_\mu=\partial/\partial\lambda^\mu\), a sum over repeated indices, and the Berry connection \(A_\mu=i\langle u|\partial_\mu u\rangle\) (real),</p>
+<p class="disp">\[ \begin{aligned}\mathrm{d}s^2&=1-\big|\langle u(\boldsymbol\lambda)|u(\boldsymbol\lambda+\mathrm{d}\boldsymbol\lambda)\rangle\big|^2=\htmlId{m-gdd}{g_{\mu\nu}\,\mathrm{d}\lambda^\mu\mathrm{d}\lambda^\nu},\\ g_{\mu\nu}&=\htmlId{m-re}{\mathrm{Re}\langle\partial_\mu u|\partial_\nu u\rangle}-\htmlId{m-aa}{A_\mu A_\nu} .\end{aligned} \tag{2.1} \]</p>
+</div>
+<details class="proof"><summary>Proof</summary>
+<p>One and two derivatives of \(\langle u|u\rangle=1\) give the two facts that enter the expansion:</p>
+<p class="disp">\[ \begin{aligned}
+\langle\partial_\mu u|u\rangle+\langle u|\partial_\mu u\rangle=0\quad&\Longrightarrow\quad\langle u|\partial_\mu u\rangle=-iA_\mu,\ A_\mu\in\mathbb R,\\
+\mathrm{Re}\langle u|\partial_\mu\partial_\nu u\rangle&=-\mathrm{Re}\langle\partial_\mu u|\partial_\nu u\rangle\qquad\text{(symmetrized in }\mu\nu).
+\end{aligned} \tag{2.2} \]</p>
+<p>Only the part symmetric in \(\mu\nu\) survives contraction with \(\mathrm{d}\lambda^\mu\mathrm{d}\lambda^\nu\). The distance then follows in one chain:</p>
+<p class="disp">\[ \begin{aligned}
+\mathrm{d}s^2&=1-\Big|1-iA_\mu\,\mathrm{d}\lambda^\mu+\tfrac12\langle u|\partial_\mu\partial_\nu u\rangle\,\mathrm{d}\lambda^\mu\mathrm{d}\lambda^\nu\Big|^2 &&{\footnotesize\text{Taylor}}\\
+&=-\big(\mathrm{Re}\langle u|\partial_\mu\partial_\nu u\rangle+A_\mu A_\nu\big)\,\mathrm{d}\lambda^\mu\mathrm{d}\lambda^\nu &&{\footnotesize\text{first order is imaginary}}\\
+&=\underbrace{\big(\mathrm{Re}\langle\partial_\mu u|\partial_\nu u\rangle-A_\mu A_\nu\big)}_{g_{\mu\nu}}\,\mathrm{d}\lambda^\mu\mathrm{d}\lambda^\nu &&{\footnotesize\text{(2.2)}}
+\end{aligned} \tag{2.3} \]</p>
+</details>
+
+<p><say at="m-gdd" ink="line">Expanding the overlap to second order in \(\mathrm{d}\boldsymbol\lambda\) gives the quadratic form \(g_{\mu\nu}\,\mathrm{d}\lambda^\mu\mathrm{d}\lambda^\nu\); we carry out the expansion in the proof.</say> <say at="m-re" ink="dot">\(\mathrm{Re}\langle\partial_\mu u|\partial_\nu u\rangle\,\mathrm{d}\lambda^\mu\mathrm{d}\lambda^\nu\) is the squared length of the change \(|\mathrm{d}u\rangle=|\partial_\mu u\rangle\,\mathrm{d}\lambda^\mu\) of the state vector.</say></p>
+
+<p class="key" at="m-aa" ink="box" keep>Subtracting \(A_\mu A_\nu\) removes the part of \(|\partial_\mu u\rangle\) that points along \(|u\rangle\) itself, which only changes the phase.</p>
+
+<p class="key">Replacing \(|u\rangle\) by \(e^{-i\beta(\boldsymbol\lambda)}|u\rangle\) leaves \(g_{\mu\nu}\) unchanged, as it must, since the distance contains only an overlap probability.</p>
+
+<div class="check ask">
+<p>Take the one-parameter family \(|u(\lambda)\rangle=e^{i\lambda}|u_0\rangle\), with \(|u_0\rangle\) fixed and normalized. Use (2.1) to find \(g_{\lambda\lambda}\).</p>
+</div>
+</section>
+
+<section>
+<h2 data-num="3">The phase around a loop: Berry connection and curvature</h2>
+
+<p><k>Only the modulus of an overlap enters the metric; the phase of overlaps carries the second geometric object.</k> <say>A single overlap \(\langle u_1|u_2\rangle\) has no physical phase, because we may multiply \(|u_2\rangle\) by any \(e^{i\beta}\).</say> <say>A closed chain of overlaps does.</say></p>
+
+<div class="env def" data-label="Definition 3.1">
+<p><b>Berry phase, connection and curvature.</b> For the closed loop through \(u_1,u_2,\dots,u_N\) <a href="#ref1">[1, 2]</a>,</p>
+<p class="disp">\[ \gamma=-\arg\big(\htmlId{b-12}{\langle u_1|u_2\rangle}\htmlId{b-23}{\langle u_2|u_3\rangle}\cdots\langle u_N|u_1\rangle\big). \tag{3.1} \]</p>
+<p>For a smooth loop, \(\gamma=\oint A_\mu\,\mathrm{d}\lambda^\mu\) with the Berry connection \(\htmlId{b-A}{A_\mu=i\langle u|\partial_\mu u\rangle}\). For a loop that bounds a surface in a two-parameter space \((x,y)\), Stokes' theorem gives \(\gamma=\int\Omega\,\mathrm{d}x\,\mathrm{d}y\) with the Berry curvature \(\Omega=\partial_x A_y-\partial_y A_x\).</p>
+</div>
+
+<p><k>\(\gamma\) is unchanged when we rephase any \(|u_j\rangle\), because each state appears once as a ket and once as a bra.</k> <say at="b-12 b-23" ink="hl">\(|u_2\rangle\) is the ket of \(\langle u_1|u_2\rangle\) and the bra of \(\langle u_2|u_3\rangle\), so a factor \(e^{i\beta}\) on \(|u_2\rangle\) appears once as \(e^{i\beta}\) and once as \(e^{-i\beta}\).</say> <say>For a smooth loop, neighbouring states are close, and the product becomes an integral:</say></p>
+<p class="disp">\[ \begin{aligned}
+\gamma&=-\arg\prod_j\big(1-iA_\mu\,\mathrm{d}\lambda^\mu\big) &&\text{neighbouring overlaps, (2.2)}\\
+&=-\arg\exp\Big(-i\oint A_\mu\,\mathrm{d}\lambda^\mu\Big) &&1-ix\approx e^{-ix}\\
+&=\oint A_\mu\,\mathrm{d}\lambda^\mu .
+\end{aligned} \tag{3.2} \]</p>
+
+<p><say at="b-A" ink="line">The connection in the last line of (3.2) is the \(A_\mu\) of Definition 3.1, the same quantity whose square we subtracted in the metric.</say></p>
+
+<div class="env thm" data-label="Theorem 3.2">
+<p><b>Gauge rule and curvature.</b> If we use \(|u'\rangle=e^{-i\beta}|u\rangle\) in place of \(|u\rangle\), then \(\htmlId{c-gauge}{A'_\mu=A_\mu+\partial_\mu\beta}\), the Berry phase changes by \(2\pi n\), and \(\Omega\) is unchanged. The curvature is</p>
+<p class="disp" id="c-om">\[ \Omega=-2\,\mathrm{Im}\langle\partial_x u|\partial_y u\rangle. \tag{3.3} \]</p>
+</div>
+<details class="proof"><summary>Proof</summary>
+<p class="disp">\[ \begin{aligned}
+A'_\mu&=i\langle u|e^{i\beta}\,\partial_\mu\big(e^{-i\beta}|u\rangle\big)\\
+&=i\langle u|\big(-i\,\partial_\mu\beta\big)|u\rangle+i\langle u|\partial_\mu u\rangle=A_\mu+\partial_\mu\beta,\\
+\oint A'_\mu\,\mathrm{d}\lambda^\mu&=\oint A_\mu\,\mathrm{d}\lambda^\mu+\underbrace{\oint\partial_\mu\beta\,\mathrm{d}\lambda^\mu}_{2\pi n} &&{\footnotesize\text{the state returns}}
+\end{aligned} \tag{3.4} \]</p>
+<p>The curl of \(\partial_\mu\beta\) vanishes, so \(\Omega\) is gauge invariant. For (3.3):</p>
+<p class="disp">\[ \begin{aligned}
+\Omega&=i\big(\langle\partial_x u|\partial_y u\rangle+\langle u|\partial_x\partial_y u\rangle\big)\\
+&\quad-i\big(\langle\partial_y u|\partial_x u\rangle+\langle u|\partial_y\partial_x u\rangle\big) &&{\footnotesize\text{(2.2)}}\\
+&=i\big(\langle\partial_x u|\partial_y u\rangle-\langle\partial_y u|\partial_x u\rangle\big) &&{\footnotesize\text{2nd derivatives cancel}}\\
+&=-2\,\mathrm{Im}\langle\partial_x u|\partial_y u\rangle &&z-\bar z=2i\,\mathrm{Im}\,z
+\end{aligned} \tag{3.5} \]</p>
+</details>
+
+<p><say at="c-gauge" ink="line">A change of phase convention shifts \(A_\mu\) by a gradient, so \(A_\mu\) at a single point has no physical value.</say> <say at="c-om" ink="box" keep>\(\Omega\) is the curl of \(A_\mu\), and the curl of a gradient vanishes, so every phase convention gives the same \(\Omega\).</say></p>
+
+<p class="key">In the language of electromagnetism, \(A_\mu\) is a vector potential in parameter space, \(\Omega\) is the magnetic field it produces, and \(\gamma\) is the flux through the loop, like an Aharonov–Bohm phase.</p>
+</section>
+
+<section>
+<h2 data-num="4">One object, two parts, and the spin in a field</h2>
+
+<p class="key">The metric and the curvature are the real and imaginary parts of a single complex matrix [[pt-tensor]].</p>
+
+<div class="env def" data-label="Definition 4.1">
+<p><b>Quantum geometric tensor.</b></p>
+<p class="disp">\[ \begin{aligned}Q_{\mu\nu}&=\langle\partial_\mu u|\partial_\nu u\rangle-\langle\partial_\mu u|u\rangle\langle u|\partial_\nu u\rangle,\\ \mathrm{Re}\,Q_{\mu\nu}&=g_{\mu\nu},\qquad \mathrm{Im}\,Q_{xy}=-\tfrac12\Omega .\end{aligned} \tag{4.1} \]</p>
+</div>
+<details class="proof"><summary>Proof</summary>
+<p class="disp">\[ \begin{aligned}
+Q_{\mu\nu}&=\langle\partial_\mu u|\partial_\nu u\rangle-(iA_\mu)(-iA_\nu)=\langle\partial_\mu u|\partial_\nu u\rangle-A_\mu A_\nu &&\text{(2.2)}\\
+&\Longrightarrow\ \mathrm{Re}\,Q_{\mu\nu}=g_{\mu\nu},\ \mathrm{Im}\,Q_{xy}=-\tfrac12\Omega &&{\footnotesize\text{(2.1), (3.3)}}
+\end{aligned} \tag{4.2} \]</p>
+</details>
+
+<div class="env thm" data-label="Theorem 4.2">
+<p><b>Curvature needs distance.</b> \(g_{xx}+g_{yy}\ge|\Omega|\).</p>
+</div>
+<details class="proof"><summary>Proof</summary>
+<p>\(Q\) is the Gram matrix of the vectors \(|\partial_\mu u\rangle\) with their components along \(|u\rangle\) removed, so it is positive semidefinite, and its \(2\times2\) determinant is non-negative [[pt-psd]]:</p>
+<p class="disp">\[ \begin{aligned}
+0\le\det Q&=g_{xx}g_{yy}-|Q_{xy}|^2=g_{xx}g_{yy}-g_{xy}^2-\tfrac14\Omega^2\\
+\Longrightarrow\quad g_{xx}+g_{yy}&\ge2\sqrt{g_{xx}g_{yy}}\ge|\Omega| &&{\footnotesize\text{AM–GM}}
+\end{aligned} \tag{4.3} \]</p>
+</details>
+
+<p class="key">Take a spin-\(\tfrac12\) in a magnetic field \(\mathbf B=B\hat{\mathbf n}\), where the unit vector \(\hat{\mathbf n}\) has polar angle \(\theta\) and azimuth \(\phi\).</p>
+
+<div class="env ex" data-label="Example 4.3">
+<p><b>The Bloch sphere.</b> <k>The lower-energy state points along \(\hat{\mathbf n}\) (for a positive magnetic moment).</k> In one choice of phase, it reads</p>
+<p class="disp">\[ \begin{gathered}|u(\theta,\phi)\rangle=\begin{pmatrix}\cos(\theta/2)\\ e^{i\phi}\sin(\theta/2)\end{pmatrix},\\ |\partial_\theta u\rangle=\frac12\begin{pmatrix}-\sin(\theta/2)\\ e^{i\phi}\cos(\theta/2)\end{pmatrix},\quad |\partial_\phi u\rangle=\begin{pmatrix}0\\ ie^{i\phi}\sin(\theta/2)\end{pmatrix}.\end{gathered} \tag{4.4} \]</p>
+<p class="key">The curvature is \(\Omega_{\theta\phi}=-\tfrac12\sin\theta\) and the metric is \(\mathrm{d}s^2=\tfrac14(\mathrm{d}\theta^2+\sin^2\theta\,\mathrm{d}\phi^2)\): the states of a spin form a sphere of radius \(\tfrac12\), and the curvature equals \(-2\) times its area element \(\tfrac14\sin\theta\,\mathrm{d}\theta\,\mathrm{d}\phi\).</p>
+</div>
+<details class="proof"><summary>Calculation</summary>
+<p class="disp">\[ \begin{aligned}
+A_\theta&=i\langle u|\partial_\theta u\rangle=\tfrac{i}{2}\big(-\cos\tfrac{\theta}{2}\sin\tfrac{\theta}{2}+\sin\tfrac{\theta}{2}\cos\tfrac{\theta}{2}\big)=0,\\
+A_\phi&=i\langle u|\partial_\phi u\rangle=i\cdot i\sin^2\tfrac{\theta}{2}=-\sin^2\tfrac{\theta}{2},\\
+\Omega_{\theta\phi}&=\partial_\theta A_\phi-\partial_\phi A_\theta=-\sin\tfrac{\theta}{2}\cos\tfrac{\theta}{2}=-\tfrac12\sin\theta .
+\end{aligned} \tag{4.5} \]</p>
+<p class="disp">\[ \begin{aligned}
+g_{\theta\theta}&=\langle\partial_\theta u|\partial_\theta u\rangle-A_\theta^2=\tfrac14,\\
+g_{\phi\phi}&=\langle\partial_\phi u|\partial_\phi u\rangle-A_\phi^2=\sin^2\tfrac{\theta}{2}-\sin^4\tfrac{\theta}{2}=\sin^2\tfrac{\theta}{2}\cos^2\tfrac{\theta}{2}=\tfrac14\sin^2\theta,\\
+g_{\theta\phi}&=\mathrm{Re}\langle\partial_\theta u|\partial_\phi u\rangle-A_\theta A_\phi=\mathrm{Re}\big(\tfrac{i}{2}\sin\tfrac{\theta}{2}\cos\tfrac{\theta}{2}\big)=0.
+\end{aligned} \tag{4.6} \]</p>
+</details>
+
+<p class="key">A loop of field directions that encloses solid angle \(\Sigma\) therefore gives the Berry phase \(\gamma=-\tfrac12\Sigma\) (Figure 4.1), Berry's original example <a href="#ref1">[1]</a>.</p>
+
+<figure class="plot narrow"><img src="figures/bloch.png" alt="A loop of field directions on the Bloch sphere"><figcaption><span class="sc">Figure 4.1.</span> A loop of field directions \(\hat{\mathbf n}\) (red) encloses the solid angle \(\Sigma\) (shaded cap). The lower-energy spin state follows \(\hat{\mathbf n}\) and returns with the Berry phase \(-\tfrac12\Sigma\).</figcaption></figure>
+
+<p class="key">Over the whole sphere, the curvature integrates to \(-2\pi\).</p>
+<p class="disp">\[ \int_0^{\pi}\!\!\int_0^{2\pi}\Omega_{\theta\phi}\,\mathrm{d}\phi\,\mathrm{d}\theta=-\tfrac12\cdot 2\pi\cdot\int_0^\pi\sin\theta\,\mathrm{d}\theta=-2\pi . \tag{4.7} \]</p>
+
+<p><k>The sphere has no boundary, so if \(A_\mu\) were smooth on the whole sphere, Stokes' theorem would give zero. It is not.</k> At the south pole, \(\theta=\pi\), the state (4.4) is \((0,e^{i\phi})^{T}\), whose phase depends on the direction from which we approach the pole. Multiplying by \(e^{-i\phi}\) cures the south pole and breaks the north pole.</p>
+
+<p><k>No single phase choice is smooth everywhere, and the two patches differ by \(e^{i\phi}\), which winds once around the boundary between them.</k> <k>That winding is the \(-2\pi\) in (4.7), a winding number of the kind in (1.1).</k> In the language of electromagnetism, the sphere surrounds a magnetic monopole of strength \(-\tfrac12\) placed at \(\mathbf B=0\), where the two spin states are degenerate.</p>
+</section>
+
+<section>
+<h2 data-num="5">The Chern number</h2>
+
+<div class="env thm" data-label="Theorem 5.1">
+<p><b>Chern number.</b> For a state defined on a closed two-dimensional parameter space \(M\) <a href="#ref4">[3, 4]</a>,</p>
+<p class="disp">\[ C=\frac{1}{2\pi}\int_M \Omega\,\mathrm{d}x\,\mathrm{d}y \tag{5.1} \]</p>
+<p>is an integer; (4.7) is the case where \(M\) is the sphere. It measures the obstruction to a single smooth choice of phase over all of \(M\); \(C=0\) exactly when such a choice exists.</p>
+</div>
+<details class="proof"><summary>Proof</summary>
+<p>We divide \(M\) into patches \(P\) on which a smooth phase choice exists. Along each boundary shared by two patches, the two phase choices differ by some \(e^{i\beta}\), so by Stokes' theorem in each patch and then (3.4),</p>
+<p class="disp">\[ \int_M\Omega\,\mathrm{d}x\,\mathrm{d}y=\sum_P\oint_{\partial P}A_\mu\,\mathrm{d}\lambda^\mu=\sum_{\text{shared boundaries}}\oint\partial_\mu\beta\,\mathrm{d}\lambda^\mu=2\pi\sum n . \tag{5.2} \]</p>
+</details>
+
+<p class="key">For a two-band crystal, write \(H(\mathbf k)=\mathbf d(\mathbf k)\cdot\boldsymbol\sigma\), with Pauli matrices \(\boldsymbol\sigma\) acting on two orbitals. The bands are \(E_\pm=\pm|\mathbf d|\), and the lower band's state at \(\mathbf k\) is the Bloch-sphere state pointing along \(-\hat{\mathbf n}(\mathbf k)\), with \(\hat{\mathbf n}=\mathbf d/|\mathbf d|\).</p>
+
+<div class="env thm" data-label="Theorem 5.2">
+<p><b>Chern number as a degree.</b> For the lower band of \(H=\mathbf d\cdot\boldsymbol\sigma\),</p>
+<p class="disp">\[ C=\deg\hat{\mathbf n}, \tag{5.3} \]</p>
+<p>the number of times the map \(\mathbf k\mapsto\hat{\mathbf n}(\mathbf k)\) covers the sphere, counted with orientation.</p>
+</div>
+<details class="proof"><summary>Proof</summary>
+<p>The curvature at \(\mathbf k\) is the sphere's curvature at \(-\hat{\mathbf n}(\mathbf k)\), multiplied by the Jacobian of the map \(\mathbf k\mapsto-\hat{\mathbf n}(\mathbf k)\). Integrating over the Brillouin zone therefore gives the sphere's total flux \(-2\pi\) from (4.7), times the degree of that map. Reversing every vector reverses the orientation of the sphere, so \(\deg(-\hat{\mathbf n})=-\deg\hat{\mathbf n}\), and</p>
+<p class="disp">\[ C=\frac{1}{2\pi}\,(-2\pi)\,\big(-\deg\hat{\mathbf n}\big)=\deg\hat{\mathbf n}. \tag{5.4} \]</p>
+</details>
+
+<p class="key">The degree is a count: pick a point on the sphere, find every \(\mathbf k\) that maps to it, and add \(+1\) or \(-1\) for each, according to whether the map preserves or reverses orientation there.</p>
+
+<div class="env ex" data-label="Example 5.3">
+<p class="key"><b>The Qi–Wu–Zhang model</b> <a href="#ref5">[5]</a>, \(\mathbf d=(\sin k_x,\ \sin k_y,\ m+\cos k_x+\cos k_y)\) on the square Brillouin zone, has</p>
+<p class="disp key">\[ C=\begin{cases}1-1-1+1=0, & m\gt 2\quad\text{(all four points)},\\ 1-1-1=-1, & 0\lt m\lt 2\quad\text{(all but }(\pi,\pi)),\\ +1, & -2\lt m\lt 0\quad\text{(only }(0,0)),\\ 0, & m\lt -2\quad\text{(none)}.\end{cases} \tag{5.5} \]</p>
+</div>
+<details class="proof"><summary>Count</summary>
+<p>We count the preimages of the north pole, \(\hat{\mathbf n}=(0,0,1)\), where the sphere's orientation agrees with that of the \((d_x,d_y)\) plane. The north pole requires \(\sin k_x=\sin k_y=0\), so \(\mathbf k\) is one of \((0,0)\), \((\pi,0)\), \((0,\pi)\), \((\pi,\pi)\), where \(d_z\) equals \(m+2\), \(m\), \(m\), \(m-2\); we keep the points with \(d_z\gt 0\).</p>
+<p>The orientation sign at each point is that of \(\partial(d_x,d_y)/\partial(k_x,k_y)=\cos k_x\cos k_y\): \(+1\) at \((0,0)\) and \((\pi,\pi)\), \(-1\) at \((\pi,0)\) and \((0,\pi)\). Adding the signs of the points that qualify gives (5.5).</p>
+</details>
+
+<figure class="plot"><img src="figures/qwz_phase.png" alt="Gap and Chern number of the QWZ model against m"><figcaption><span class="sc">Figure 5.1.</span> QWZ model. Top: the gap \(2\min_{\mathbf k}|\mathbf d|\). Bottom: the Chern number of the lower band, computed by integrating \(\Omega\) over the zone; it agrees with the count (5.5) and jumps only where the gap closes.</figcaption></figure>
+
+<p class="key">The integer changes only at \(m=2,0,-2\) (Figure 5.1), and at exactly these values \(\mathbf d\) vanishes somewhere in the zone (\(d_z=0\) at one of the four points), so the two bands touch. This is the origin in (1.1) again: the integer can change only where the state is undefined.</p>
+</section>
+
+<section>
+<h2 data-num="6">Why topology survives in a crystal</h2>
+
+<p class="key">The mathematics carries over to a crystal because of three facts.</p>
+
+<p class="key">First, the Brillouin zone is a closed surface: \(\mathbf k\) and \(\mathbf k+\mathbf G\) label the same state, so in two dimensions the zone is a torus, and Theorem 5.1 applies to every band.</p>
+
+<p><k>Second, the band state \(|u_n(\mathbf k)\rangle\) is defined continuously as long as band \(n\) stays separated by a gap from its neighbours.</k> As we found for the QWZ model, \(C\) can only change when a gap closes. <k>Disorder, strain or a change of parameters that keeps the gap open cannot change \(C\).</k></p>
+
+<p class="key">Third, \(C\) appears in a measurable response, the Hall conductance.</p>
+
+<div class="env thm" data-label="Theorem 6.1">
+<p><b>Quantized Hall conductance.</b> A two-dimensional insulator has \(\sigma_{xy}=-C\,e^2/h\) with our conventions, where \(C\) is summed over the filled bands <a href="#ref6">[6]</a>.</p>
+</div>
+<details class="proof"><summary>Proof</summary>
+<p>An electron in band \(n\), accelerated by a force \(\hbar\dot{\mathbf k}=-e\mathbf E\), moves with velocity <a href="#ref3">[3]</a></p>
+<p class="disp">\[ \mathbf v_n(\mathbf k)=\frac1\hbar\frac{\partial E_n}{\partial\mathbf k}-\dot{\mathbf k}\times\boldsymbol\Omega_n(\mathbf k), \tag{6.1} \]</p>
+<p>where \(\boldsymbol\Omega_n=\Omega_n\hat{\mathbf z}\) in two dimensions; the second term, the anomalous velocity, follows from the time-dependent perturbation theory of a Bloch state. For \(\mathbf E=E_y\hat{\mathbf y}\), the current density of a filled band in a sample of unit area is</p>
+<p class="disp">\[ \begin{aligned}
+j_x&=-e\int_{\text{BZ}}\frac{\mathrm{d}^2k}{(2\pi)^2}\,v_x=-e\int_{\text{BZ}}\frac{\mathrm{d}^2k}{(2\pi)^2}\,\big(-\dot k_y\,\Omega_n\big) &&{\footnotesize\text{(6.1), $E_n$ periodic}}\\
+&=-\frac{e^2}{\hbar}E_y\int_{\text{BZ}}\frac{\mathrm{d}^2k}{(2\pi)^2}\,\Omega_n &&{\footnotesize\text{$\hbar\dot k_y=-eE_y$}}\\
+&=-\frac{e^2}{\hbar}E_y\,\frac{2\pi C}{(2\pi)^2}=-\frac{e^2}{h}\,C\,E_y &&\text{(5.1)}
+\end{aligned} \tag{6.2} \]</p>
+</details>
+
+<p class="key">Thouless, Kohmoto, Nightingale and den Nijs derived this result in 1982, and with it we understand why the quantum Hall plateaus that von Klitzing found are flat and reproducible to about one part in a billion: the measured number is a topological invariant, not a material parameter.</p>
+
+<p class="key">By the same reasoning, the edge of the sample must carry states. The vacuum outside has \(C=0\), so \(C\) must change across the edge, and \(C\) can only change where a gap closes: the gap must close somewhere along the edge.</p>
+
+<p>This step needs one more premise: deep inside the sample and far outside it, the system is translation invariant and has its own \(C\), and any smooth interpolation between two Hamiltonians with different \(C\) passes through a gapless one; the edge is such an interpolation, carried out in space <a href="#ref7">[7]</a>. <k>States therefore cross the gap at the boundary of every sample with \(C\ne0\), and their number (counted with direction) equals the change in \(C\) across the boundary.</k> <k>This bulk–boundary correspondence is the observable signature of a topological insulator.</k></p>
+</section>
+
+<section>
+<h2 data-num="7">Why you should care</h2>
+
+<p class="key">Most materials are not Chern insulators, but the geometry in Sections 2–4 acts in every band.</p>
+
+<p class="key">In a metal, the anomalous Hall conductivity is still the integral of \(\Omega_n\), now over only the occupied states, \(\sigma_{xy}\propto\sum_n\int_{\text{occ}}\Omega_n\,\mathrm{d}^2k\). The integral is no longer an integer, but \(\Omega_n\) is large where two bands nearly touch, so near-degeneracies dominate the response <a href="#ref3">[3]</a> (Figure 7.1).</p>
+
+<figure class="plot narrow"><img src="figures/qwz_curvature.png" alt="Berry curvature of the lower QWZ band"><figcaption><span class="sc">Figure 7.1.</span> Berry curvature of the lower QWZ band at \(m=1.6\), close to the gap closing at \(m=2\), from \(\Omega=\tfrac12\hat{\mathbf n}\cdot(\partial_{k_x}\hat{\mathbf n}\times\partial_{k_y}\hat{\mathbf n})\), the density of the degree in (5.3). The curvature piles up at \((\pi,\pi)\), where the gap is smallest, and integrates to \(2\pi C=-2\pi\).</figcaption></figure>
+
+<p class="key">This is the calculation behind the anomalous Hall effect in altermagnets such as RuO\(_2\), where one integrates the curvature of the bands below the Fermi energy.</p>
+
+<div class="env thm" data-label="Theorem 7.1">
+<p><b>Symmetry and curvature</b> <a href="#ref3">[3]</a>.</p>
+<p class="disp">\[ \underbrace{\Omega_n(-\mathbf k)=-\Omega_n(\mathbf k)}_{\text{time reversal}},\qquad\underbrace{\Omega_n(-\mathbf k)=\Omega_n(\mathbf k)}_{\text{inversion}}\qquad\Longrightarrow\qquad\Omega_n=0\ \ \text{(both)}. \tag{7.1} \]</p>
+</div>
+
+<p class="key">A nonzero anomalous Hall response therefore requires broken time reversal, and the magnetic space group fixes which components of \(\boldsymbol\Omega\) may survive.</p>
+
+<p class="key">The integral of the metric over the zone is the gauge-invariant part of the spread of the Wannier functions <a href="#ref8">[8]</a>, so a band with large \(g\) cannot be built from compact orbitals. With Theorem 4.2, a Chern band has \(\int(g_{xx}+g_{yy})\,\mathrm{d}^2k\ge2\pi|C|\), and no set of exponentially localized Wannier functions exists for it <a href="#ref9">[9]</a>.</p>
+
+<p class="key">In a flat band, where the kinetic energy vanishes, the superfluid weight of a superconductor is the Brillouin-zone integral of the quantum metric and is bounded below by \(|C|\), so pairs can move even when single electrons cannot [[pt-flat]].</p>
+</section>
+
+<section class="sources">
+<h2 class="unnumbered">References</h2>
+<ol class="biblio">
+<li id="ref1">M. V. Berry, Proc. R. Soc. Lond. A <b>392</b>, 45 (1984).</li>
+<li id="ref2">D. Vanderbilt, <i>Berry Phases in Electronic Structure Theory</i> (Cambridge University Press, 2018).</li>
+<li id="ref3">D. Xiao, M.-C. Chang and Q. Niu, Rev. Mod. Phys. <b>82</b>, 1959 (2010).</li>
+<li id="ref4">M. Nakahara, <i>Geometry, Topology and Physics</i>, 2nd ed. (IOP, 2003).</li>
+<li id="ref5">X.-L. Qi, Y.-S. Wu and S.-C. Zhang, Phys. Rev. B <b>74</b>, 085308 (2006).</li>
+<li id="ref6">D. J. Thouless, M. Kohmoto, M. P. Nightingale and M. den Nijs, Phys. Rev. Lett. <b>49</b>, 405 (1982).</li>
+<li id="ref7">M. Z. Hasan and C. L. Kane, Rev. Mod. Phys. <b>82</b>, 3045 (2010).</li>
+<li id="ref8">N. Marzari and D. Vanderbilt, Phys. Rev. B <b>56</b>, 12847 (1997).</li>
+<li id="ref9">C. Brouder, G. Panati, M. Calandra, C. Mourougane and N. Marzari, Phys. Rev. Lett. <b>98</b>, 046402 (2007).</li>
+<li id="ref10">S. Peotta and P. Törmä, Nat. Commun. <b>6</b>, 8944 (2015).</li>
+</ol>
+</section>

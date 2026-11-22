@@ -1,0 +1,7 @@
+{
+  "name": "unfold",
+  "version": "0.1.0",
+  "description": "Build source-anchored HTML reading notes one calibrated section at a time, with hover previews of cited PDF passages, fold levels and a click-through Lecture Mode with a laser pointer.",
+  "license": "MIT",
+  "keywords": ["notes", "learning", "pdf", "citations", "katex", "lecture"]
+}

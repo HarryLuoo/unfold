@@ -1,0 +1,17 @@
+{
+  "name": "unfold",
+  "owner": { "name": "unfold contributors" },
+  "metadata": {
+    "description": "Marketplace for the unfold plugin: source-anchored HTML reading notes with Lecture Mode.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "unfold",
+      "source": "./",
+      "description": "Build source-anchored HTML reading notes one calibrated section at a time, with hover previews of cited PDF passages, fold levels and a click-through Lecture Mode with a laser pointer.",
+      "version": "0.1.0",
+      "license": "MIT"
+    }
+  ]
+}

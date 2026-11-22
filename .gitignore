@@ -1,0 +1,6 @@
+_build/
+__pycache__/
+*.pyc
+.venv/
+# built reader's files (CI rebuilds them)
+examples/quantum-geometry/quantum-geometry.html

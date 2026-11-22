@@ -1,0 +1,6 @@
+pymupdf
+pillow
+fonttools
+brotli
+matplotlib
+numpy
