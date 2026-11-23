@@ -9,6 +9,8 @@ This skill builds a NotesTeX-style HTML note together with a reader, one section
 
 All paths below are relative to this skill's folder (the folder that holds this file): the engine is `scripts/`, the page design `assets/`, and two references sit in `references/`.
 
+**First, on any computer:** `uv run scripts/note.py doctor` prints what the computer has and lacks, with the fix for each; it installs nothing. When it reports a gap, tell the user in one line and ask before installing or downloading anything. Every later step runs through `scripts/note.py` (Reference → Commands).
+
 Three questions have three homes, kept apart so that each can change on its own:
 
 | Question | Where |
@@ -49,7 +51,7 @@ A note lives in its own folder, `NOTE_DIR/`:
 | `<name>.html` | the reader's file, written by the build (to `config(out=...)`) |
 | `_build/` | crops and intermediates, written by the build |
 
-`calibration.md` and `plan.md` are working files for whoever writes the note; the reader does not need to read them. They keep later sections consistent with earlier ones, and let a new session pick up a half-finished note.
+`calibration.md` and `plan.md` are working files for whoever writes the note; the reader does not need to read them. They keep later sections consistent with earlier ones, and let a new session pick up a half-finished note. `uv run scripts/note.py new NOTE_DIR NAME` creates `cites.py`, with source paths relative to the note folder, `content.html`, `calibration.md` and `figures/`.
 
 ## Where each piece of content goes
 
@@ -77,7 +79,7 @@ When no source covers what the reader needs, first look for a textbook or paper 
    - Pitch each strand's first question near the hardest thing the goal needs. Correct and confident: jump up. Correct but unsure: step up gently. Wrong: step down to find where understanding ends. Wrong and confident: a misconception; probe its extent.
    - Stop when each strand has a floor (what they get right) and a ceiling (what they miss). Every question must move a floor or a ceiling.
    - Record strands, floors, ceilings and any confusing phrasing in `calibration.md`.
-5. **Extract text.** Dump every source's page text with markers (`===== file PDF page n =====`) using PyMuPDF, and read it to choose quotes. Slides and figures lose content in extraction, so render them with `page.get_pixmap(dpi=70)` and look at the images.
+5. **Extract text.** Dump every source's page text with markers (`===== file PDF page n =====`) using PyMuPDF, and read it to choose quotes. Slides and figures lose content in extraction, so render them with `page.get_pixmap(dpi=70)` and look at the images. `uv run scripts/note.py find "<phrase>" <pdfs>` prints the pages that hold a phrase and whether it works as a crop anchor.
 6. **Write the plan** in `plan.md`: a graph built backward from the goal (principle 9).
    - Each node records a short label, the statement it establishes, its terms, symbols and equations (for closure), its source pages, the question its predecessor leaves open (for momentum), and which later nodes use it.
    - Try deleting each node in turn; if every later node still follows, the node goes.
@@ -93,9 +95,9 @@ When no source covers what the reader needs, first look for a textbook or paper 
 
 1. **Write the next section only,** pitched from `calibration.md`; never write ahead of the reader's answers or add what the plan does not need. Write the section's key sentences first (principle 6), show them when the reader asked to be taught, then write the prose around them.
    - When the next node has a step the reader could guess, ask one prediction question in chat before writing it, and open the section by resolving the guess. When there is nothing to guess, skip it.
-2. **Build:** `uv run scripts/build.py NOTE_DIR` (or `python scripts/build.py NOTE_DIR` after `pip install -r requirements.txt`), with `scripts/` taken from this skill's folder. The build lists every anchor it cannot find; fix those, rebuild, and look at a sample of the crops in `NOTE_DIR/_build/<name>_files/`: at least one each from single-column, two-column and slide sources.
+2. **Build:** `uv run scripts/note.py build NOTE_DIR` (the same as `scripts/build.py NOTE_DIR`; without uv, run either with `python` after `pip install -r requirements.txt`). The build lists every anchor it cannot find; fix those (`note.py find` tests a new phrase), rebuild, and look at a sample of the crops in `NOTE_DIR/_build/<name>_files/`: at least one each from single-column, two-column and slide sources.
 3. **Review every figure** at full size after each render: no label crossing a line, arrow, border or another label; no legend over data; nothing clipped. Fix and re-render before embedding.
-4. **Verify the page** in a browser (Reference → Verification): the new section as screenshots, a citation preview, the phone-width layout, zero `katex-error` elements, no display equation wider than the column, the new section at the Points level. Check every quote and citation against the extracted text.
+4. **Verify the page:** `uv run scripts/note.py check NOTE_DIR` counts math errors, broken images, dead cross-references and anything wider than the column at 1440 and 500 px, and saves screenshots at Read and Points (Reference → Verification). Look at the new section in the screenshots, open one citation preview, and check every quote and citation against the extracted text.
 5. **Deliver the section,** say which section is new, and wait for the reader to read it.
 6. **Check the section** once they have read it.
    - Ask 2–4 questions in chat, one at a time, each chosen after the previous answer, with answer, confidence and one line of reasoning.
@@ -126,16 +128,29 @@ A fix to the engine or template goes into `scripts/`, `assets/` and this file. A
 
 ## Reference
 
+### Commands
+
+`uv run scripts/note.py <command>` (or `python scripts/note.py <command>` after `pip install -r requirements.txt`):
+
+| Command | What it does |
+|---|---|
+| `doctor` | prints the Python packages, Node and browser that the computer has and lacks, with the fix for each; installs nothing |
+| `new NOTE_DIR NAME [--title T] [--pdf FILE …]` | creates `cites.py`, with source paths relative to the note folder, `content.html`, `calibration.md` and `figures/` |
+| `find "<phrase>" FILE.pdf …` | prints each page that holds the phrase, and whether the phrase works as a crop anchor |
+| `build NOTE_DIR [--share]` | builds the reader's file (Reference → Packaging) |
+| `map NOTE_DIR` | draws `map.mmd` with Mermaid in the installed browser and saves `figures/map.svg` |
+| `check NOTE_DIR` | checks the reader's file in the installed browser and saves screenshots (Reference → Verification) |
+
 ### Environment
 
-`uv run scripts/build.py NOTE_DIR` installs the dependencies from the script's header on first use. Without uv: `pip install -r requirements.txt`. Only PyMuPDF is required; Pillow and fontTools with brotli shrink the single-file output; NumPy and Matplotlib draw figures. KaTeX and Computer Modern are downloaded once into `~/.cache/html-notes`. When `node` is on `PATH`, the build draws the math at build time, so it shows in viewers that do not run scripts; without `node`, the page draws it when it opens. When the CDNs in `notelib.py` are blocked, the engine falls back to the npm registry (KaTeX) and raw GitHub (fonts).
+`uv run` installs each script's dependencies from its header on first use; without uv, `pip install -r requirements.txt`. Only PyMuPDF is required; Pillow and fontTools with brotli shrink the single-file output; NumPy and Matplotlib draw figures. When `node` is on `PATH`, the build draws the math at build time, so it shows in viewers that do not run scripts; without `node`, the page draws it when it opens. `map` and `check` run in an installed Chrome, Edge or Chromium; for another browser, set `HTMLNOTES_BROWSER` to its path. The first build downloads KaTeX and Computer Modern (about 1 MB) and the first map downloads Mermaid (about 3 MB) into `~/.cache/html-notes`; when a CDN is blocked, the engine tries a second source. The engine downloads nothing else: no npx, no Puppeteer, no browser.
 
 ### Map
 
 Write the map as Mermaid `graph TD` in `map.mmd`, generated from the plan: roots at the top, the goal at the bottom, `A --> B` meaning A must be understood before B. Labels are a few words; the precision lives in the plan.
 - `classDef` styles: `held` (what the reader already holds, grey), `done` (sections written and checked, filled), `current` (the section being read, highlighted), `checkpoint` (double border), `goal`.
-- Render with `mmdc -i map.mmd -o figures/map.svg -b white` (`npx -y @mermaid-js/mermaid-cli` when `mmdc` is absent).
-- Embed as `<figure class="plot" id="map"><img src="figures/map.svg" alt="Map of the note"><figcaption><span class="sc">Map.</span> …</figcaption></figure>` right after the title block.
+- `uv run scripts/note.py map NOTE_DIR` draws the map and saves `figures/map.svg`; it stops with a message when the SVG would not show in the page.
+- Embed as `<figure class="plot narrow" id="map"><img src="figures/map.svg" alt="Map of the note"><figcaption><span class="sc">Map.</span> …</figcaption></figure>` right after the title block; `narrow` keeps a tall map from filling the screen.
 - Re-render after every decision in the loop.
 
 ### `cites.py` API
@@ -157,7 +172,7 @@ link("web-x", "Project page", "https://example.org/page", "quoted text from the 
 
 - **Handwritten or scanned pages** have no searchable text: cite them with `mode="page"`, or `frac=(top, bottom)` for a horizontal band given as fractions of the page height. When a book's printed page offset varies, pass `printed="482"` per citation.
 - **`pdf(key, src, page, where, start, end, mode="crop", pad=(top, bottom))`.** The crop runs from the first match of `start` to the first later match of `end` on the 1-based PDF `page`, across the full text width; with `cols=2` it covers only the matched column. `start=None` begins at the top of the text and `end=None` ends at its bottom.
-- **Anchors** are short phrases of ordinary words that appear once on the page. Ligatures (fi, fl), math glyphs and calligraphic letters don't match in search. When a quote starts on the previous page, cite both pages with two keys. To include an equation that follows a phrase, end on the next prose phrase after it, or use `end=None`. Check new anchors before a full build by rendering only the new keys with `notelib.render_crops`.
+- **Anchors** are short phrases of ordinary words that appear once on the page. Ligatures (fi, fl), math glyphs and calligraphic letters don't match in search. When a quote starts on the previous page, cite both pages with two keys. To include an equation that follows a phrase, end on the next prose phrase after it, or use `end=None`. `note.py find` tests a new anchor before the build.
 - **Default chip labels** are `Abbr p. <printed>`, or `Slides n` when there are no printed numbers; `[[key|label]]` overrides one.
 - **Private material:** email links and unpublished sources get `private=True`; `--share` removes their links but keeps their previews.
 - **Web pages** that cannot be downloaded as PDFs are cited with `link()`, whose `text` is a verbatim excerpt retrieved from the page.
@@ -187,7 +202,7 @@ link("web-x", "Project page", "https://example.org/page", "quoted text from the 
   | `rem` | unboxed, italic label | remarks |
   | `hw` | maroon | a homework problem statement, quoted and cited; its solution follows as `<details class="proof sol"><summary>Solution (official)</summary>…</details>` or "Solution (ours, checked symbolically)" |
 
-- **Cross-references (automatic):** after KaTeX renders, the template links every plain-text mention of a numbered object in the note ("Theorem 3.6", "Lemma 4.3", "Definition 5.14", "Remark 3.9", "Figure 5.1", "Table 3.2", "Section 4", "§5.3", and "(4.5)" from `\tag{4.5}`) with a hover preview; a click scrolls there and opens any folded proof around it. Keys come from `data-label`, `\tag`, caption `.sc` numbers and `data-num`, so write references in exactly these forms. An equation number that belongs to another source sits in a chip label (`[[tong-x|Tong (3.5)]]`) or in `<span class="noref">…</span>`; a number right after a capitalized word or a possessive ("Tong (3.5)") is skipped, except after "Equation"/"Eq.", and nothing inside curly quotes is linked. Check with a DOM dump that every `a.xref` target exists.
+- **Cross-references (automatic):** after KaTeX renders, the template links every plain-text mention of a numbered object in the note ("Theorem 3.6", "Lemma 4.3", "Definition 5.14", "Remark 3.9", "Figure 5.1", "Table 3.2", "Section 4", "§5.3", and "(4.5)" from `\tag{4.5}`) with a hover preview; a click scrolls there and opens any folded proof around it. Keys come from `data-label`, `\tag`, caption `.sc` numbers and `data-num`, so write references in exactly these forms. An equation number that belongs to another source sits in a chip label (`[[tong-x|Tong (3.5)]]`) or in `<span class="noref">…</span>`; a number right after a capitalized word or a possessive ("Tong (3.5)") is skipped, except after "Equation"/"Eq.", and nothing inside curly quotes is linked. `note.py check` reports every dead cross-reference.
 - **Code and program output:** `<pre class="code">…</pre>` for input, `<pre class="code out">…</pre>` for output. Escape `<`, `>` and `&`.
 - **Proof:** `<details class="proof"><summary>Proof</summary><p>…</p></details>`, directly after its statement.
 - **Explainer widget:** `<details class="aside"><summary>Background: …</summary><p>…</p></details>`; the summary starts with "Notation:" or "Background:".
@@ -198,14 +213,10 @@ link("web-x", "Project page", "https://example.org/page", "quoted text from the 
 
 ### Verification
 
-Open the reader's file through a local server (`python -m http.server` in its folder) in a browser, or use headless Chrome with `--screenshot` and `--dump-dom`. Keep test copies outside the note folder.
-- **Overflow:** every `.katex-display` with `scrollWidth > clientWidth`, and tables wider than their wrapper, at widths 1600, 1440 (the pinned outline narrows the column from 1400 px) and 500; break each hit with `aligned`/`gathered`. No equation tag may sit on its equation.
+`note.py check` copies the reader's file to `~/.cache/html-notes/check/<name>/`, outside the note folder, opens it in the installed browser at 1440 and 500 px, counts math errors, broken images, dead cross-references and displays, code blocks and tables wider than the column, and saves three screenshots: Read at both widths and Points at 1440 px. It exits with an error when a math error, a broken image or a dead cross-reference turns up; break a wide display with `aligned` or `gathered`. By hand:
 - **Preview:** `show(document.querySelector('a.cite[data-k="KEY"]'))` opens a citation preview.
-- **Themes:** `data-theme="light"` or `data-theme="dark"` on `<html>`. **Open widgets:** `open` on `details.aside`.
-- **Headless screenshots of a later section:** headless Chrome paints blank frames after scrolling, so hide every sibling before the target section in a test copy and screenshot from the top.
 - **Lecture Mode:** `LV.missing` lists pointer targets with no element; `lvNext()`, `lvFold(level)` and `lvFinish()` step through a lecture.
 - **Handwritten sources:** render pages at 150 dpi, transcribe them with one agent per lecture, page by page, using a model that keeps daggers and indices, and check a sample by hand.
-- **Offline single file:** Chrome with `--host-resolver-rules="MAP * ~NOTFOUND"` on a copy in an empty folder; check `document.querySelectorAll('.katex').length` and `document.fonts.check("16px 'Computer Modern Serif'")`.
 
 ### Packaging
 

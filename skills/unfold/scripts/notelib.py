@@ -343,6 +343,8 @@ def _cmu_css(text):
 
 def _image_uri(path):
     data = open(path, "rb").read()
+    if path.lower().endswith(".svg"):  # Pillow cannot open SVG, and a PNG label hides it from the browser
+        return b64(data, "image/svg+xml")
     try:
         from PIL import Image
         im = Image.open(io.BytesIO(data))

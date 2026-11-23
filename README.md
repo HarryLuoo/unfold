@@ -54,7 +54,7 @@ No PDFs yet? Ask a question instead (*"Teach me Berry curvature from scratch"*) 
 
 ### Use with any coding agent
 
-`unfold` uses plain Markdown instructions and CLI scripts. Point any agent at [`skills/unfold/SKILL.md`](skills/unfold/SKILL.md); it reads `references/` and runs `scripts/build.py` directly.
+`unfold` uses plain Markdown instructions and CLI scripts. Point any agent at [`skills/unfold/SKILL.md`](skills/unfold/SKILL.md); it reads `references/` and runs the scripts in `scripts/` directly, starting with `scripts/note.py doctor`, which checks the setup.
 
 ### Run the engine standalone
 
@@ -71,6 +71,13 @@ pip install -r skills/unfold/requirements.txt
 python skills/unfold/scripts/build.py examples/quantum-geometry
 ```
 
+`note.py` runs the other steps. `doctor` reports what your computer has and lacks and installs nothing, `new` starts a note folder, `find` locates a phrase in a PDF and tests it as a crop anchor, `map` draws the note's Mermaid map in your installed Chrome, Edge or Chromium, and `check` opens the built page in that browser and reports math errors, broken images and overflow:
+
+```bash
+uv run skills/unfold/scripts/note.py doctor
+uv run skills/unfold/scripts/note.py check examples/quantum-geometry
+```
+
 The build writes one offline file (`examples/quantum-geometry/quantum-geometry.html`). When `node` is on your `PATH`, KaTeX prerenders all math at build time; otherwise the browser renders it on open. Batch builds run via `scripts/rebuild_all.py <manifest.json>`.
 
 ### Customize writing style
@@ -85,7 +92,7 @@ Prose rules live solely in [`skills/unfold/references/style-default.md`](skills/
 skills/unfold/
   SKILL.md               Interactive study loop, note principles, engine reference
   references/            live-mode.md (Lecture Mode markup), style-default.md (prose style)
-  scripts/               build.py, notelib.py, rebuild_all.py
+  scripts/               note.py (commands), build.py, notelib.py, rebuild_all.py
   assets/                template.html, lecture.css, lecture.js (inlined at build time)
   requirements.txt       Python dependencies for pip users
 examples/

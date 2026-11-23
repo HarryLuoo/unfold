@@ -23,17 +23,32 @@ Legacy layout (no out=): outputs go to root as before
 Needs PyMuPDF; single-file outputs also use Pillow (WebP images) and fontTools+brotli (font subsetting)
 when installed, and download KaTeX + Computer Modern once into ~/.cache/html-notes.
 """
-import importlib.util, os, sys
+import importlib.util, os, shutil, sys
 
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import notelib as N
+
+def preflight():
+    """Name a missing piece in one line instead of failing deep inside the build."""
+    if importlib.util.find_spec("pymupdf") is None:
+        sys.exit(f"unfold: PyMuPDF is missing from {sys.executable}. Run the build with uv run, which installs "
+                 "the dependencies in this script's header, or pip install -r requirements.txt.")
+    if not os.path.exists(N._cached(N.KATEX + "katex.min.js")):
+        print(f"unfold: first build on this computer; downloading KaTeX and Computer Modern "
+              f"(about 1 MB) into {N.CACHE}")
+    if shutil.which("node") is None:
+        print("unfold: node not found, so the math renders in the browser instead of at build time")
+    if importlib.util.find_spec("brotli") is None:
+        print("unfold: brotli not installed, so the fonts go in unsubset and the reader's file is larger "
+              "(pip install brotli fixes it)")
 
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     flags = {a for a in sys.argv[1:] if a.startswith("--")}
     if len(args) != 1:
         sys.exit(__doc__)
+    preflight()
     note_dir = os.path.abspath(args[0])
     spec = importlib.util.spec_from_file_location("cites", os.path.join(note_dir, "cites.py"))
     spec.loader.exec_module(importlib.util.module_from_spec(spec))
