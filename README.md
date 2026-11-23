@@ -8,6 +8,8 @@ Interactive study notes as single, offline HTML files—written with an agent, g
 
 ![Lecture Mode: the pointer moves to dθ, then to 2π, while the narration below explains each term](docs/lecture.gif)
 
+https://github.com/user-attachments/assets/59f5af4d-21c0-479b-8afe-5309f6b3ee41
+
 ## Why unfold
 
 Reading dense papers or long AI summaries fails in two familiar ways: heavy notation buries the main thread, while fluent prose hides unverified claims. `unfold` pairs a standalone HTML note engine with a structured teaching loop (`SKILL.md`):
