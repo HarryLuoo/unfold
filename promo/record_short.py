@@ -108,6 +108,8 @@ async def capture(view_w, view_h, scale):
             if r:
                 marks.append((now(), label, [v * scale for v in r]))
 
+        await mark(["main.page p", "main.page h1", "main.page .env", "main.page .katex-display"], "column")  # the text column
+
         async def glide(x, y, ms):
             x0, y0 = await page.evaluate("[window.__cx || innerWidth * 0.75, window.__cy || innerHeight * 0.8]")
             start = time.time()
@@ -255,6 +257,18 @@ def chat_camera_keys(marks, W, H):
         cx, cy, z = fit(m["card"], W, H, 1.5, 1.9)
         k += [(5.95, cx, cy, z), (CHAT, cx, cy, fit(m["card"], W, H, 1.0, 2.6)[2])]
     return k
+
+
+def keep_column(cam, marks, W, H, margin):
+    """On a narrow (vertical) page, the camera may crop the margins but never the text column."""
+    col = next((r for _, l, r in marks if l == "column"), None)
+    if not col or W > H:
+        return cam
+    cx, cy, z = cam
+    x0, x1 = max(0, col[0] - margin), min(W, col[2] + margin)
+    z = max(1.0, min(z, W / (x1 - x0)))
+    half = W / z / 2
+    return (min(max(cx, x1 - half), x0 + half), cy, z)
 
 
 def camera_at(keys, ct):
@@ -408,7 +422,7 @@ def compose(chat, page, fmt):
         else:
             while k + 1 < len(shots) and shots[k + 1][0] <= max(ct, 0):
                 k += 1
-            frame = shoot(shots[k][1], camera_at(keys, max(ct, 0)), w, h)
+            frame = shoot(shots[k][1], keep_column(camera_at(keys, max(ct, 0)), marks, W, H, 10 * W / 600), w, h)
             d = ImageDraw.Draw(frame)
             d.text((w - d.textlength(URL, font=mark_f) - 28, h - 56), URL, font=mark_f, fill=(150, 150, 150))
             for (a, b, where, side), text in zip(CAPTION_TIMES, L("captions")):
