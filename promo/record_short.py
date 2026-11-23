@@ -1,4 +1,4 @@
-"""Record a ~27-second promo of the unfold demo as MP4 with sound, vertical (1080x1920) and landscape (1920x1080).
+"""Record a ~27-second promo of the unfold demo as MP4 with sound, vertical 3:4 (1080x1440) and landscape (1920x1080).
 
 It opens on a chat (chat.html): three PDFs dragged in, "help me learn this", Claude works through four steps,
 and the cursor opens the note it returns. Then the title card, the demo, and the end card.
@@ -216,7 +216,7 @@ def camera_keys(marks, W, H):
         z = min(W / ((x1 - x0) * pad), H / ((y1 - y0) * pad), zmax)
         return ((x0 + x1) / 2, (y0 + y1) / 2 + bias * H / z, max(1.0, z))
     m = {l: r for _, l, r in marks}
-    zmax = 1.4 if H > W else 1.6
+    zmax = 1.5 if H > W else 1.6
     k = [(0.0, *full), (0.7, *full)]
     for i, t in enumerate((1.6, 2.9, 4.2, 5.2)):
         e = m.get(f"eq{min(i + 1, 3)}") or m.get("eq0")
@@ -228,8 +228,8 @@ def camera_keys(marks, W, H):
         k.append((t, (e[0] + e[2]) / 2, cy, max(1.0, z)))
     k += [(6.0, *full), (7.2, *full)]
     if "preview" in m:
-        cx, cy, z = fit(m["preview"], pad=1.15, zmax=1.0 if H > W else 1.7)
-        k += [(8.1, W / 2 if H > W else cx, cy, z), (10.3, W / 2 if H > W else cx, cy, z * 1.04)]
+        cx, cy, z = fit(m["preview"], pad=1.15, zmax=1.5 if H > W else 1.7)
+        k += [(8.1, cx, cy, z), (10.3, cx, cy, z * 1.04)]
     k += [(10.9, W / 2, H / 2, 1.0), (CARD_CT, W / 2, H * 0.47, 1.06)]
     return k
 
@@ -281,12 +281,20 @@ def camera_at(keys, ct):
     return keys[-1][1:]
 
 
-def shoot(img, cam, out_w, out_h):
+def shoot(img, cam, out_w, out_h, center=False):
+    """Crop the camera's view. With center, the view stays centred on its target even past the top or bottom
+    of the captured page; the missing strip is filled with the page's own background."""
     cx, cy, z = cam
     W, H = img.size
     cw, ch = W / z, H / z
-    x0 = min(max(cx - cw / 2, 0), W - cw); y0 = min(max(cy - ch / 2, 0), H - ch)
-    return img.resize((out_w, out_h), Image.BICUBIC, box=(x0, y0, x0 + cw, y0 + ch))
+    x0 = min(max(cx - cw / 2, 0), W - cw)
+    y0 = cy - ch / 2 if center else min(max(cy - ch / 2, 0), H - ch)
+    if 0 <= y0 and y0 + ch <= H:
+        return img.resize((out_w, out_h), Image.BICUBIC, box=(x0, y0, x0 + cw, y0 + ch))
+    m = int(max(-y0, y0 + ch - H)) + 8
+    canvas = Image.new("RGB", (W, H + 2 * m), img.getpixel((W - 4, 4)))
+    canvas.paste(img, (0, m))
+    return canvas.resize((out_w, out_h), Image.BICUBIC, box=(x0, y0 + m, x0 + cw, y0 + m + ch))
 
 
 HERO, RETREAT = 1.8, 0.5   # a caption holds the screen, then flies into its card
@@ -397,7 +405,7 @@ def compose(chat, page, fmt):
     tag = fmt + ("" if LANG == "en" else "-" + LANG)
     (cshots, cmarks, ccues), (shots, marks, cues) = chat, page
     vertical = fmt == "vertical"
-    w, h = (1080, 1920) if vertical else (1920, 1080)
+    w, h = (1080, 1440) if vertical else (1920, 1080)
     W, H = shots[0][1].size
     keys, ckeys = camera_keys(marks, W, H), chat_camera_keys(cmarks, *cshots[0][1].size)
     os.makedirs(OUT, exist_ok=True)
@@ -409,7 +417,7 @@ def compose(chat, page, fmt):
     blank = title_card((w, h), 0.0, vertical)
     mark_f = font("consola.ttf", 30 if vertical else 26)
     k = kc = 0
-    checks = [round(x * FPS) for x in (0.9, 2.2, 4.4, 5.9, 7.0, 7.6, 8.6, 10.0, 14.0, 15.6, 18.8, 21.0, 25.0)]
+    checks = [round(x * FPS) for x in (1.0, 2.2, 4.4, 6.0, 9.4, 10.6, 11.8, 12.6, 15.6, 16.6, 17.6, 21.0, 23.0)]
     for n in range(int(TOTAL * FPS)):
         v = n / FPS; ct = v - P0; u = v - CHAT
         if v < CHAT:  # the chat scene, then a white-out into the title
@@ -422,7 +430,7 @@ def compose(chat, page, fmt):
         else:
             while k + 1 < len(shots) and shots[k + 1][0] <= max(ct, 0):
                 k += 1
-            frame = shoot(shots[k][1], keep_column(camera_at(keys, max(ct, 0)), marks, W, H, 10 * W / 600), w, h)
+            frame = shoot(shots[k][1], keep_column(camera_at(keys, max(ct, 0)), marks, W, H, 10 * W / 720), w, h, center=vertical)
             d = ImageDraw.Draw(frame)
             d.text((w - d.textlength(URL, font=mark_f) - 28, h - 56), URL, font=mark_f, fill=(150, 150, 150))
             for (a, b, where, side), text in zip(CAPTION_TIMES, L("captions")):
@@ -624,8 +632,8 @@ def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--format", default="both", choices=["vertical", "landscape", "both"])
     ap.add_argument("--lang", default="en", choices=sorted(TEXT))
     a = ap.parse_args(); fmt, LANG = a.format, a.lang
-    if fmt in ("vertical", "both"):   # a phone-shaped page at 2x: room for the camera to push in
-        compose(asyncio.run(capture_chat(600, 1066, 2.0)), asyncio.run(capture(600, 1066, 2.0)), "vertical")
+    if fmt in ("vertical", "both"):   # a 3:4 page, 720 x 960 CSS px at 2x
+        compose(asyncio.run(capture_chat(720, 960, 2.0)), asyncio.run(capture(720, 960, 2.0)), "vertical")
     if fmt in ("landscape", "both"):  # 1024 x 576 CSS px at 2x
         compose(asyncio.run(capture_chat(1024, 576, 2.0)), asyncio.run(capture(1024, 576, 2.0)), "landscape")
 
