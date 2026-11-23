@@ -75,6 +75,13 @@ function lvPrepare() {
       if (c.matches("h2, h3, .marginnote")) pre.push(c);
       else if (c.matches("details")) { const last = LV.beats[LV.beats.length - 1]; if (LV.beats.length > n0) last.els.push(c); else pre.push(c); }
       else if (c.matches(".check")) LV.beats.push({type: "check", sec, src: c, els: [...pre.splice(0), c]});
+      else if (c.matches("figure.strokes") && c.querySelector(".stroke")) {  // one beat per stroke; the caption comes with the last
+        const ss = [...c.querySelectorAll(".stroke")], cap = c.querySelector(":scope > figcaption");
+        ss.forEach(hold); if (cap) hold(cap);
+        ss.forEach((s, j) => LV.beats.push({type: "board", sec, src: s, say: s.getAttribute("data-say") || "",
+                                             els: j ? [s] : [...pre.splice(0), c, s]}));
+        if (cap) LV.beats[LV.beats.length - 1].els.push(cap);
+      }
       else if (c.matches("p") && !c.matches(".key, .disp") && !c.querySelector(".katex-display")) { c.classList.remove("lv-el"); paragraph(c, sec, pre); }
       else LV.beats.push({type: "board", sec, src: c, els: [...pre.splice(0), c]});
     });
@@ -85,7 +92,7 @@ function lvPrepare() {
   let last = null, lastSec = null;
   LV.beats.forEach(b => {
     if (b.sec !== lastSec) { last = null; lastSec = b.sec; }
-    b.els.forEach(e => { last = e.matches("k, say") ? e.parentElement : e; });
+    b.els.forEach(e => { last = e.matches("k, say") ? e.parentElement : (e.closest("figure.strokes") || e); });
     b.after = last;
   });
 
@@ -196,10 +203,14 @@ function lvFold(level, byUser) {
    otherwise in the narration block under the last block written. */
 function lvVoice(b, anim) {
   LV.say.replaceChildren(); LV.say.remove();
-  if (b.type === "check" || b.src.getClientRects().length) return;
-  const c = b.src.cloneNode(true);
-  c.querySelectorAll("[id]").forEach(x => x.removeAttribute("id")); c.removeAttribute("id");
-  if (c.matches("k, say")) LV.say.append(...c.childNodes); else LV.say.append(c);
+  if (b.type === "check") return;
+  if (b.say) LV.say.textContent = b.say;  // a figure stroke's narration
+  else {
+    if (b.src.getClientRects().length) return;
+    const c = b.src.cloneNode(true);
+    c.querySelectorAll("[id]").forEach(x => x.removeAttribute("id")); c.removeAttribute("id");
+    if (c.matches("k, say")) LV.say.append(...c.childNodes); else LV.say.append(c);
+  }
   if (b.after) b.after.after(LV.say); else (b.sec.querySelector(".abstract") || b.sec).prepend(LV.say);
   if (anim) { LV.say.classList.remove("lv-fade"); void LV.say.offsetWidth; LV.say.classList.add("lv-fade"); }
 }

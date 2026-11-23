@@ -23,6 +23,8 @@ body:not(.lv-ready) main.page:has([data-live]) { opacity: 0; }
   to   { opacity: 1; clip-path: inset(-12px -70% -12px -240px); }
 }
 .lv-in { animation: lv-in .55s ease-out; }
+figure.strokes .stroke.lv-in { animation: lv-stroke .45s ease-out; }  /* a figure drawn stroke by stroke */
+@keyframes lv-stroke { from { opacity: 0; } to { opacity: 1; } }
 
 /* What is visible follows one rule, in and out of a lecture: an element shows when it has been played
    (always true outside a lecture) and the fold level (keys 1-4) keeps it. Full and Read keep everything;

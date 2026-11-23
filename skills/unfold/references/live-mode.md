@@ -34,6 +34,7 @@ Nothing is needed to play an existing note: every `<k>`, `p.key`, block, display
 - `<say>…</say>` around each narration sentence, in the paragraph where the sentence belongs in the note.
 - `at="id"`, `ink="dot|line|box|hl"` and `keep` on a `<say>`, a `<k>` or a board element. `at` takes one or more ids; without `at`, the pointer marks the element itself. `keep` leaves the mark in the note after the lecture.
 - `\htmlId{id}{…}` around a term inside an equation, or `<span id="…">` around words, to make a target. `\htmlId` needs KaTeX's `trust` option, which both the build and the page enable.
+- `<figure class="plot strokes">` holding an inline `<svg>` whose strokes are `<g class="stroke">` elements, in drawing order: each stroke is one board beat, and the caption comes with the last. `data-say="…"` on a stroke is its narration (plain text, one sentence). Outside a lecture the figure is complete. Use it for a sketch the reader will draw by hand; only a figure that is a direct child of a section plays this way.
 - `<div class="check predict">` with a question and a list whose items each end in `<span class="r">…</span>`, the reply to that choice.
 - `<div class="check ask">` with one question. The page adds an answer box, a confidence field and a button that copies the answer for the chat.
 
