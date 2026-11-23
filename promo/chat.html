@@ -1,0 +1,167 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>chat scene</title>
+<style>
+:root{--paper:#faf9f6;--ink:#161616;--muted:#6b6b6b;--line:#e4e1da;--red:#e0322d;--bubble:#efece6}
+html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);overflow:hidden;
+  font:15px/1.45 "Segoe UI",system-ui,sans-serif}
+.app{position:relative;height:100%;display:flex;flex-direction:column}
+header{height:46px;flex:none;display:flex;align-items:center;gap:9px;padding:0 18px;border-bottom:1px solid var(--line);
+  font-weight:600;font-size:14px;color:var(--muted)}
+header i{width:9px;height:9px;border-radius:50%;background:var(--red)}
+.col{width:min(620px,calc(100% - 64px));margin:0 auto}
+.thread{flex:1;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;padding-bottom:14px}
+.thread .col{display:flex;flex-direction:column}
+.empty{position:absolute;left:0;right:0;top:36%;text-align:center;font:600 27px Georgia,serif;transition:opacity .3s}
+.empty small{display:block;font:15px "Segoe UI";color:var(--muted);margin-top:8px}
+.composer{flex:none;margin:0 auto 18px;box-sizing:border-box;background:#fff;border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 4px 18px rgba(0,0,0,.06);padding:10px 10px 10px 14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chips:empty{display:none}
+.chip{display:flex;align-items:center;gap:6px;background:var(--bubble);border-radius:9px;padding:5px 9px;font-size:12.5px;
+  animation:pop .35s cubic-bezier(.2,1.6,.4,1) both}
+.chip b,.f b{background:var(--red);color:#fff;font-size:9px;padding:1px 4px;border-radius:3px;letter-spacing:.03em}
+.row{display:flex;align-items:flex-end;gap:8px}
+.input{flex:1;min-height:24px;padding:5px 0;font-size:15.5px;white-space:nowrap}
+.ph{color:#a5a29b}
+.caret{display:inline-block;width:1.5px;height:18px;background:var(--ink);vertical-align:-3px;margin-left:1px}
+.send{width:34px;height:34px;flex:none;border-radius:50%;background:#d8d4cc;color:#fff;font-size:18px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;transition:background .2s,transform .12s}
+.send.on{background:var(--ink)} .press{transform:scale(.88)!important}
+.drop{position:absolute;inset:58px 16px 12px;border:2.5px dashed var(--red);border-radius:20px;background:rgba(224,50,45,.05);
+  display:flex;align-items:center;justify-content:center;font-weight:600;font-size:19px;color:var(--red);opacity:0;transition:opacity .25s}
+.drag{position:absolute;left:0;top:0;width:190px;height:120px;pointer-events:none;transition:opacity .2s,transform .2s}
+.f{position:absolute;width:168px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:12px;
+  box-shadow:0 8px 22px rgba(0,0,0,.14);display:flex;gap:7px;align-items:center}
+.msg{opacity:0;transform:translateY(14px);transition:opacity .3s,transform .4s cubic-bezier(.2,.8,.2,1)}
+.msg.in{opacity:1;transform:none}
+.user{align-self:flex-end;max-width:82%;background:var(--bubble);border-radius:16px 16px 4px 16px;padding:10px 14px;margin-bottom:16px}
+.user .chips{margin-bottom:6px} .user .chip{background:#fff;animation:none}
+.who{font-weight:700;font-size:14px;margin-bottom:4px}
+.steps{list-style:none;padding:0;margin:0 0 10px}
+.steps li{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;height:0;opacity:0;overflow:hidden;
+  transition:height .25s,opacity .25s,color .2s}
+.steps li.in{height:27px;opacity:1} .steps li.done{color:var(--ink)}
+.ic{width:15px;height:15px;flex:none;box-sizing:border-box;border:2px solid var(--line);border-top-color:var(--red);border-radius:50%;
+  animation:sp .7s linear infinite}
+li.done .ic{animation:none;border:0;background:var(--ink);position:relative}
+li.done .ic::after{content:"";position:absolute;left:5px;top:2.5px;width:3.5px;height:7px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.card{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;
+  box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.doc{width:30px;height:38px;flex:none;border-radius:4px;background:linear-gradient(225deg,#f3c9c7 0 8px,var(--red) 8px)}
+.card .t{font-weight:700;font-size:14.5px} .card .s{color:var(--muted);font-size:12.5px}
+.open{margin-left:auto;background:var(--ink);color:#fff;border-radius:10px;padding:7px 15px;font-weight:600;font-size:13.5px;transition:transform .12s}
+.cursor{position:absolute;left:0;top:0;width:22px;height:22px;z-index:9;pointer-events:none;
+  background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M1 1l5 14 2-6 6-2z' fill='%23161616' stroke='%23fff' stroke-width='1.2'/%3E%3C/svg%3E")}
+html[lang=zh] body{font-family:"Microsoft YaHei","Segoe UI",sans-serif}
+html[lang=zh] .empty{font-family:"Noto Serif SC","Microsoft YaHei",serif;font-weight:800}
+html[lang=zh] .empty small{font-family:"Microsoft YaHei",sans-serif;font-weight:400}
+@keyframes sp{to{transform:rotate(360deg)}}
+@keyframes pop{from{opacity:0;transform:scale(.6)}}
+</style></head>
+<body><div class="app">
+  <header><i></i><span id="hd"></span></header>
+  <div class="empty" id="empty"><span id="q"></span><small id="qs"></small></div>
+  <div class="thread"><div class="col" id="thread"></div></div>
+  <div class="composer col" id="composer">
+    <div class="chips" id="chips"></div>
+    <div class="row"><div class="input"><span id="typed"></span><span class="caret" id="caret"></span><span class="ph" id="ph"></span></div>
+      <div class="send" id="send">&uarr;</div></div>
+  </div>
+  <div class="drop" id="drop"></div>
+  <div class="drag" id="drag"></div>
+  <div class="cursor" id="cursor"></div>
+</div>
+<script>
+const FILES = ["Peotta_Torma_2015.pdf", "Berry_phase_review.pdf", "lecture-notes-wk3.pdf"];
+const S = {  // every word the scene adds, per language (?lang=zh)
+  en: {hd: "New chat", q: "What do you want to learn?", qs: "Drop papers, chapters, slides or scans", ph: "Ask anything",
+       drop: "Drop to attach", ask: "help me learn this", reply: "Reply", open: "Open",
+       card: "Plays as a lecture &middot; folds &middot; cites each PDF",
+       steps: ["Reading 3 PDFs", "Mapping the ideas, floor to goal", "Writing sections, every claim cited", "Building one offline HTML file"]},
+  zh: {hd: "新对话", q: "你想学什么？", qs: "拖入论文、章节、讲义或扫描件", ph: "有问题尽管问",
+       drop: "松开即可添加", ask: "帮我学这个", reply: "回复", open: "打开",
+       card: "可像讲课一样播放 &middot; 可折叠 &middot; 引用每份 PDF",
+       steps: ["阅读 3 份 PDF", "梳理思路：从基础到目标", "逐节撰写，每条论断都有出处", "生成一个离线 HTML 文件"]},
+};
+const LANG = new URLSearchParams(location.search).get("lang") === "zh" ? "zh" : "en";
+const T = S[LANG], STEPS = T.steps;
+document.documentElement.lang = LANG;
+for (const id of ["hd", "q", "qs", "ph", "drop"]) document.getElementById(id).textContent = T[id];
+const $ = id => document.getElementById(id);
+const fileChip = n => `<div class="chip"><b>PDF</b>${n}</div>`;
+window.__cues = []; window.__marks = [];
+let T0 = 0;
+const now = () => (performance.now() - T0) / 1000;
+const cue = k => __cues.push([now(), k]);
+const at = t => new Promise(r => setTimeout(r, Math.max(0, (t - now()) * 1000)));
+const rect = (label, ...els) => {
+  let a = null;
+  for (const e of els) { const r = e.getBoundingClientRect();
+    a = a ? [Math.min(a[0], r.left), Math.min(a[1], r.top), Math.max(a[2], r.right), Math.max(a[3], r.bottom)] : [r.left, r.top, r.right, r.bottom]; }
+  __marks.push([now(), label, a]);
+};
+const cur = {x: innerWidth + 40, y: innerHeight * 0.72};
+function place() {
+  $("cursor").style.transform = `translate(${cur.x - 2}px,${cur.y - 2}px)`;
+  $("drag").style.left = (cur.x - 30) + "px"; $("drag").style.top = (cur.y - 24) + "px";
+}
+function glide(x, y, ms) {
+  const x0 = cur.x, y0 = cur.y, s0 = performance.now();
+  return new Promise(done => { const f = () => {
+    const s = Math.min(1, (performance.now() - s0) / ms), e = s < .5 ? 4 * s * s * s : 1 - Math.pow(-2 * s + 2, 3) / 2;
+    cur.x = x0 + (x - x0) * e; cur.y = y0 + (y - y0) * e; place();
+    if (s < 1) requestAnimationFrame(f); else done(); }; f(); });
+}
+const center = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+async function press(el) { cue("key"); el.classList.add("press"); await new Promise(r => setTimeout(r, 120)); el.classList.remove("press"); }
+setInterval(() => { $("caret").style.visibility = $("caret").style.visibility === "hidden" ? "visible" : "hidden"; }, 530);
+
+window.__play = async () => {
+  T0 = performance.now();
+  $("drag").innerHTML = FILES.map((n, i) => `<div class="f" style="left:${i * 9}px;top:${i * 12}px;transform:rotate(${(i - 1) * 4}deg)"><b>PDF</b>${n}</div>`).join("");
+  place();
+  // 1. drag three PDFs in from the desktop and drop them on the chat
+  await at(0.15); cue("drag");
+  const [cx, cy] = center($("composer"));
+  glide(cx - 40, cy - 30, 950);
+  await at(0.5); $("drop").style.opacity = 1;
+  await at(1.12); cue("drop");
+  $("drop").style.opacity = 0; $("drag").style.opacity = 0; $("drag").style.transform = "scale(.5)";
+  $("ph").textContent = "";
+  for (let i = 0; i < 3; i++) { await at(1.18 + 0.11 * i); cue("chip"); $("chips").insertAdjacentHTML("beforeend", fileChip(FILES[i])); }
+  await at(1.5); rect("composer", $("composer"));
+  // 2. type the request and send it
+  const text = T.ask, dt = 0.75 / text.length;
+  for (let i = 0; i < text.length; i++) { await at(1.6 + dt * i + (i % 3) * 0.006); cue("type"); $("typed").textContent = text.slice(0, i + 1); }
+  $("send").classList.add("on");
+  const [sx, sy] = center($("send"));
+  await at(2.3); glide(sx + 3, sy + 4, 280);
+  await at(2.6); await press($("send")); cue("send");
+  $("empty").style.opacity = 0; $("chips").innerHTML = ""; $("typed").textContent = ""; $("ph").textContent = T.reply;
+  $("send").classList.remove("on");
+  $("thread").insertAdjacentHTML("beforeend", `<div class="msg user" id="u"><div class="chips">${FILES.map(fileChip).join("")}</div>${text}</div>`);
+  requestAnimationFrame(() => $("u").classList.add("in"));
+  glide(innerWidth * 0.86, innerHeight * 0.62, 600);
+  // 3. Claude works through four steps, about three seconds
+  await at(2.95);
+  $("thread").insertAdjacentHTML("beforeend", `<div class="msg" id="a"><div class="who">Claude</div><ul class="steps" id="steps">${
+    STEPS.map(s => `<li><span class="ic"></span>${s}</li>`).join("")}</ul><div id="slot"></div></div>`);
+  requestAnimationFrame(() => $("a").classList.add("in"));
+  await at(3.0); rect("convo", $("u"), $("a"));
+  const li = [...$("steps").children];
+  for (let i = 0; i < li.length; i++) {
+    await at(3.05 + 0.55 * i); li[i].classList.add("in");
+    await at(3.05 + 0.55 * i + 0.45); li[i].classList.add("done"); cue("step");
+  }
+  // 4. the note arrives; open it
+  await at(5.3);
+  $("slot").innerHTML = `<div class="msg card" id="card"><div class="doc"></div><div><div class="t">quantum-geometry.html</div>
+    <div class="s">${T.card}</div></div><div class="open" id="open">${T.open}</div></div>`;
+  requestAnimationFrame(() => $("card").classList.add("in")); cue("card");
+  await at(5.6); rect("reply", $("u"), $("a")); rect("card", $("card"));
+  const [ox, oy] = center($("open"));
+  glide(ox + 2, oy + 3, 420);
+  await at(6.1); press($("open"));
+};
+</script>
+</body></html>

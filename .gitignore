@@ -4,3 +4,5 @@ __pycache__/
 .venv/
 # built reader's files (CI rebuilds them)
 examples/quantum-geometry/quantum-geometry.html
+# promo renders
+promo/out/
