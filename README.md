@@ -8,7 +8,7 @@ Interactive study notes as single, offline HTML files—written with an agent, g
 
 ![Lecture Mode: the pointer moves to dθ, then to 2π, while the narration below explains each term](docs/lecture.gif)
 
-https://github.com/user-attachments/assets/59f5af4d-21c0-479b-8afe-5309f6b3ee41
+https://github.com/user-attachments/assets/406ad84f-00b7-4e57-a7e5-bd464516e0c2
 
 ## Why unfold
 
